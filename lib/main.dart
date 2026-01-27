@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_gakgak/screens/signUp_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/profile_screen.dart';

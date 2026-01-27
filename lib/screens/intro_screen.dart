@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:mobile_gakgak/screens/signUp_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:mobile_gakgak/screens/home_screen.dart';
+import 'package:mobile_gakgak/screens/signUp_screen.dart';
+import 'package:mobile_gakgak/screens/signIn_screen.dart';
 // import 'package:mobile_gakgak/screens/profile_screen.dart';
 // import '../constant/my_constant.dart';
 
@@ -87,7 +89,7 @@ class IntroScreen extends StatelessWidget {
 
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
+              builder: (context) => const LoginScreen(),
             ),
           );
         },
