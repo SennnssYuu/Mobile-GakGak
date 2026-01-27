@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
-import 'screens/profile_screen.dart';
-import 'screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+import 'screens/profile_screen.dart';
+import 'screens/intro_screen.dart';
+
+bool seen = false;
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+  seen = prefs.getBool('seen') ?? false;
   runApp(MyApp());
 }
 
@@ -11,10 +19,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'mobile app',
-      home: ProfileScreen(),
+      home: seen == true ? ProfileScreen() : IntroScreen(),
     );
   }
 }
