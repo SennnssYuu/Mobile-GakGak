@@ -50,7 +50,7 @@ import '../widget/_menu_profile.dart';
                       ),
                     ),
                   )
-                ],
+                ],// children
               ),
               SizedBox(height: 20.0),
               Row(
