@@ -1,5 +1,57 @@
 import 'package:flutter/material.dart';
 
+class BigBorrowWidget extends StatefulWidget {
+
+  final String imageBorrow;
+
+  const BigBorrowWidget({
+    super.key,
+    required this.imageBorrow,
+  });
+
+  @override
+  State<BigBorrowWidget> createState() => _BigBorrowWidgetState();
+}
+
+class _BigBorrowWidgetState extends State<BigBorrowWidget> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Stack(
+        children: [
+          Container(
+            width: 475.0,
+            height: 250.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: Colors.grey[200],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Image.asset(
+                widget.imageBorrow, // Replace with your image path
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          if (_isHovered)
+            Container(
+              width: 475.0,
+              height: 250.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.white.withOpacity(0.05),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 class BorrowWidget extends StatefulWidget {
 
   final String imageBorrow;

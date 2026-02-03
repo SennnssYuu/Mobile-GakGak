@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widget/_home_borrow.dart';
 
+import 'package:mobile_gakgak/widget/appBackground.dart';
+
 class NoScrollbarScrollBehavior extends ScrollBehavior {
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
@@ -50,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(27, 27, 27, 1),
       appBar: AppBar(
         actions: const [
           Icon(
@@ -69,18 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Color.fromRGBO(46, 46, 46, 1),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.center,
-            radius: 1.0,
-            colors: [
-              Color.fromRGBO(33, 33, 33, 1),
-              Color.fromRGBO(27, 27, 27, 1),
-            ],
-          ),
-        ),
-        child: ScrollConfiguration(
+      body: Stack(
+        children: [
+          const AppBackground(),
+          ScrollConfiguration(
           behavior: NoScrollbarScrollBehavior(),
           child: SingleChildScrollView(
             controller: verticalController,
@@ -90,6 +83,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: 8.0),
+                  Text(
+                    'Daily Stats',
+                    style: TextStyle(
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
+
+                  BigBorrowWidget(imageBorrow: 'images/Bo0.png'),
+
                   SizedBox(height: 8.0),
                   Text(
                     'Uma Inheritance',
@@ -189,41 +194,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Tools',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 255, 255, 255),
-                    ),
-                  ),
-                  Scrollbar(
-                    thumbVisibility: false,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ToolWidget(
-                            text: 'Stamina Calculator',
-                            borderColor:   Color.fromRGBO(226, 223, 64, 1),
-                            bgColor:  Color.fromRGBO(36, 36, 36, 1),
-                          ),
-                          SizedBox(width: 16.0),
-                          ToolWidget(
-                            text: 'More',
-                            borderColor:   Color.fromRGBO(96, 96, 96, 1),
-                            bgColor:  Color.fromRGBO(83, 83, 83, 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
         ),
+        ],
       ),
     bottomNavigationBar: BottomNavigationBar(
       currentIndex: _selectedIndex,
