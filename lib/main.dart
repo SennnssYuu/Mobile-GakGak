@@ -1,13 +1,20 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_gakgak/screens/intro_screen.dart';
+import 'package:mobile_gakgak/screens/product_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'screens/profile_screen.dart';
-import 'screens/intro_screen.dart';
+import 'firebase_options.dart';
+
 
 bool seen = false;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   final prefs = await SharedPreferences.getInstance();
   seen = prefs.getBool('seen') ?? false;
@@ -22,7 +29,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'mobile app',
-      home: seen == true ? ProfileScreen() : IntroScreen(),
+      // home: seen == true ? ProfileScreen() : IntroScreen(),
+      home: IntroScreen(),
     );
   }
 }

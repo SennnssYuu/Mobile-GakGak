@@ -46,31 +46,42 @@ class MenuProfile extends StatelessWidget {
 }
 
 class SignOutMenu extends StatelessWidget {
+  final VoidCallback onTap;
+
   const SignOutMenu({
     super.key,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
-      child: Container(
-        width: double.infinity,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 248, 219, 218),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.0),
+        child: Container(
+          width: double.infinity,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 248, 219, 218),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Row(
             children: [
-              SizedBox(width: 10.0),
-              Icon(Icons.logout,
-              color: Colors.red,
-              size: 24.0),
-              SizedBox(width: 10.0),
-              Text("Sign out", style: bodyStyle.copyWith(color: Colors.red),),
+              const SizedBox(width: 10.0),
+              const Icon(
+                Icons.logout,
+                color: Colors.red,
+                size: 24.0,
+              ),
+              const SizedBox(width: 10.0),
+              Text(
+                "Sign out",
+                style: bodyStyle.copyWith(color: Colors.red),
+              ),
             ],
+          ),
         ),
       ),
     );

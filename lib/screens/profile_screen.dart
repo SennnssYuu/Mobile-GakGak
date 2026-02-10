@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_gakgak/constant/my_constant.dart';
 import '../widget/_menu_profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-  class ProfileScreen extends StatelessWidget {
-    const ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  final User userOBJ;
+  final String user;
+  
+  const ProfileScreen({
+    super.key,
+    required this.userOBJ,
+    required this.user,
+  });
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +82,7 @@ import '../widget/_menu_profile.dart';
                     alignment: Alignment.center,
                     children: [
                       Text(
-                        "ZONA PLG",
+                        widget.user,
                         style: headingStyle.copyWith(
                           foreground: Paint()
                             ..style = PaintingStyle.stroke
@@ -77,7 +91,7 @@ import '../widget/_menu_profile.dart';
                         ),
                       ),
                       Text(
-                        "ZONA PLG",
+                        widget.user,
                         style: headingStyle,
                       ),
                     ],
@@ -116,7 +130,7 @@ import '../widget/_menu_profile.dart';
                     ),
                   ),
                 ),
-                child: Text("ZONAPOLYGONGEN1@polygon.ac.th",
+                child: Text("${widget.userOBJ.email}",
                   style: buttonStyle,
                 ),
               ),
@@ -130,10 +144,6 @@ import '../widget/_menu_profile.dart';
                 title: 'Profile',
               ),
               MenuProfile(
-                iconData: Icons.edit_square,
-                title: 'Blogs',
-              ),
-              MenuProfile(
                 iconData: Icons.settings,
                 title: 'Setting',
               ),
@@ -141,7 +151,12 @@ import '../widget/_menu_profile.dart';
                 iconData: Icons.info,
                 title: 'Info',
               ),
-              SignOutMenu(),
+              SignOutMenu(
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
             ],
           ),
         ),

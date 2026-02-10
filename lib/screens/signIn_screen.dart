@@ -1,13 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
-import 'package:mobile_gakgak/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:mobile_gakgak/screens/main_screen.dart';
 import 'package:mobile_gakgak/screens/signUp_screen.dart';
 import 'package:mobile_gakgak/screens/forgotPassword_screen.dart';
 import 'package:mobile_gakgak/widget/appBackground.dart';
 
-class LoginScreen extends StatelessWidget {
+final emailCtrl = TextEditingController();
+final passwordCtrl = TextEditingController();
+
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    print('LoginScreen entered');
+    // Add initialization code here
+  }
+
+  @override
+  void dispose() {
+    // Run cleanup when leaving this screen
+    emailCtrl.clear();
+    passwordCtrl.clear();
+    print('LoginScreen disposed - cleanup complete');
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +86,9 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 8),
         
                   // Email input
-                  const TextFieldNormal(
+                  TextFieldNormal(
                     hint: 'Your Email',
+                    controller: emailCtrl,
                   ),
         
                   const SizedBox(height: 8),
@@ -74,8 +101,9 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 8),
         
                   // Password input
-                  const TFPassword(
+                  TFPassword(
                     hint: 'Your password',
+                    controller: passwordCtrl,
                   ),
         
                   const SizedBox(height: 12),
@@ -125,13 +153,30 @@ class LoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        )
-                      );
+                      onPressed: () async {
+                        try {
+                          final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: emailCtrl.text.trim(),
+                            password: passwordCtrl.text.trim(),
+                          );
+
+                          final user = credential.user!;
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MainScreen(
+                                userOBJ : user,
+                                user: user.displayName!
+                                ),
+                            )
+                          );
+                        } on FirebaseAuthException {
+                          showInvalidLoginDialog(context);
+                        }
+                        catch (e) {
+                          print(e);
+                        }
                       },
                       child: const Text(
                         'Connect',
@@ -179,7 +224,14 @@ class LoginScreen extends StatelessWidget {
                   SocialButton(
                     icon: Icons.facebook,
                     text: 'Sign in with Facebook',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForPasScreen(),
+                        )
+                      );
+                    },
                   ),
         
                   const SizedBox(height: 12),
@@ -188,7 +240,14 @@ class LoginScreen extends StatelessWidget {
                   SocialButton(
                     icon: Icons.g_mobiledata,
                     text: 'Sign in with Google',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForPasScreen(),
+                        )
+                      );
+                    },
                   ),
         
                   const SizedBox(height: 32),
@@ -218,16 +277,19 @@ class LoginScreen extends StatelessWidget {
 }
 
 class TextFieldNormal extends StatelessWidget {
-
   final String hint;
+  final TextEditingController controller;
+
   const TextFieldNormal({
     super.key,
     required this.hint,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
@@ -263,10 +325,12 @@ class Textlabel extends StatelessWidget {
 
 class TFPassword extends StatefulWidget {
   final String hint;
+  final TextEditingController controller;
 
   const TFPassword({
     super.key,
     required this.hint,
+    required this.controller,
   });
 
   @override
@@ -281,6 +345,7 @@ class _TFPasswordState extends State<TFPassword> {
     return TextField(
       obscureText: _obscureText,
       obscuringCharacter: '●', // big filled circle
+      controller: widget.controller,
       decoration: InputDecoration(
         hintText: widget.hint,
         filled: true,
@@ -336,4 +401,26 @@ class SocialButton extends StatelessWidget {
       ),
     );
   }
+}
+
+void showInvalidLoginDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Row(
+        children: const [
+          Icon(Icons.close, color: Colors.red),
+          SizedBox(width: 8),
+          Text('Login Failed'),
+        ],
+      ),
+      content: const Text('Invalid email or password'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('OK', style: TextStyle(color: Color.fromRGBO(36, 36, 36, 1))),
+        ),
+      ],
+    ),
+  );
 }

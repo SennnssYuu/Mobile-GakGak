@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "688114842013",
+    "project_id": "umamoeknockoff",
+    "storage_bucket": "umamoeknockoff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688114842013:android:41420d597fb0f61ad7d774",
+        "android_client_info": {
+          "package_name": "com.example.mobile_gakgak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGk-7AFTSyZ37bC6kub0nggLYMjBd8pmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

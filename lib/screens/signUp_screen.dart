@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:mobile_gakgak/screens/signIn_screen.dart';
 import 'package:mobile_gakgak/widget/appBackground.dart';
+import 'package:mobile_gakgak/screens/forgotPassword_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final userCtrl = TextEditingController();
+final emailCtrl = TextEditingController();
+final passwordCtrl = TextEditingController();
+final finalPasswordCtrl = TextEditingController();
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -29,7 +35,10 @@ class SignupScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        dispose();
+                        Navigator.pop(context);
+                      },
                     ),
                   ),
         
@@ -64,9 +73,10 @@ class SignupScreen extends StatelessWidget {
         
                   const SizedBox(height: 8),
         
-                  // Email input
-                  const TFNormal(
+                  // user input
+                  TFNormal(
                     hint: 'Your Username',
+                    controller: userCtrl,
                   ),
         
                   const SizedBox(height: 8),
@@ -79,8 +89,9 @@ class SignupScreen extends StatelessWidget {
                   const SizedBox(height: 8),
         
                   // Email input
-                  const TFNormal(
+                  TFNormal(
                     hint: 'Your Email',
+                    controller: emailCtrl,
                   ),
         
                   const SizedBox(height: 8),
@@ -93,8 +104,9 @@ class SignupScreen extends StatelessWidget {
                   const SizedBox(height: 8),
         
                   // Password input
-                  const TFPassword(
+                  TFPassword(
                     hint: 'Your password',
+                    controller: passwordCtrl,
                   ),
 
                   const SizedBox(height: 8),
@@ -107,8 +119,9 @@ class SignupScreen extends StatelessWidget {
                   const SizedBox(height: 8),
         
                   // Password input
-                  const TFPassword(
-                    hint: 'Your password',
+                  TFPassword(
+                    hint: 'Confirm your password',
+                    controller: finalPasswordCtrl,
                   ),
         
                   const SizedBox(height: 12),
@@ -134,13 +147,36 @@ class SignupScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        )
-                      );
+                      onPressed: () async {
+                        try {
+                          if (passwordCtrl.text.trim() != finalPasswordCtrl.text.trim()) {
+                            showInvalidLoginDialog(context, 'Passwords do not match.');
+                          }
+                          else if(userCtrl.text.trim().isEmpty){
+                            showInvalidLoginDialog(context, 'Username cannot be empty.');
+                          }
+                          else
+                          {
+                            final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: emailCtrl.text.trim(),
+                            password: passwordCtrl.text.trim(),
+                            );
+                            await credential.user!.updateDisplayName(userCtrl.text.trim());
+                            await credential.user!.reload();
+                            showValidLoginDialog(context);
+                            dispose();
+                          }
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'weak-password') {
+                            showInvalidLoginDialog(context, 'The password is too weak.');
+                          } else if (e.code == 'email-already-in-use') {
+                            showInvalidLoginDialog(context, 'The account already exists');
+                          } else {
+                            showInvalidLoginDialog(context, 'The email or password is invalid');
+                          }
+                        } catch (e) {
+                          print(e);
+                        }
                       },
                       child: const Text(
                         'Sign Up',
@@ -172,7 +208,14 @@ class SignupScreen extends StatelessWidget {
                   SocialButton(
                     icon: Icons.facebook,
                     text: 'Sign up with Facebook',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForPasScreen(),
+                        )
+                      );
+                    },
                   ),
         
                   const SizedBox(height: 12),
@@ -181,7 +224,14 @@ class SignupScreen extends StatelessWidget {
                   SocialButton(
                     icon: Icons.g_mobiledata,
                     text: 'Sign up with Google',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForPasScreen(),
+                        )
+                      );
+                    },
                   ),
         
                   const SizedBox(height: 32),
@@ -213,9 +263,12 @@ class SignupScreen extends StatelessWidget {
 class TFNormal extends StatelessWidget {
 
   final String hint;
+  final TextEditingController controller;
+  
   const TFNormal({
     super.key,
     required this.hint,
+    required this.controller,
   });
 
   @override
@@ -230,6 +283,7 @@ class TFNormal extends StatelessWidget {
           borderSide: BorderSide.none,
         ),
       ),
+      controller: controller,
     );
   }
 }
@@ -256,10 +310,12 @@ class TextLabel extends StatelessWidget {
 
 class TFPassword extends StatefulWidget {
   final String hint;
+  final TextEditingController controller;
 
   const TFPassword({
     super.key,
     required this.hint,
+    required this.controller,
   });
 
   @override
@@ -268,12 +324,12 @@ class TFPassword extends StatefulWidget {
 
 class _TFPasswordState extends State<TFPassword> {
   bool _obscureText = true;
-
   @override
   Widget build(BuildContext context) {
     return TextField(
       obscureText: _obscureText,
       obscuringCharacter: '●', // big filled circle
+      controller: widget.controller,
       decoration: InputDecoration(
         hintText: widget.hint,
         filled: true,
@@ -330,4 +386,55 @@ class SocialButton extends StatelessWidget {
       ),
     );
   }
+}
+
+void showInvalidLoginDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Row(
+        children: const [
+          Icon(Icons.close, color: Colors.red),
+          SizedBox(width: 8),
+          Text('Sign up Failed'),
+        ],
+      ),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('OK', style: TextStyle(color: Color.fromRGBO(36, 36, 36, 1))),
+        ),
+      ],
+    ),
+  );
+}
+
+void showValidLoginDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Row(
+        children: const [
+          Icon(Icons.check_circle, color: Colors.green),
+          SizedBox(width: 8),
+          Text('Sign up Successful'),
+        ],
+      ),
+      content: const Text("You may returned to Log In page."),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('OK', style: TextStyle(color: Color.fromRGBO(36, 36, 36, 1))),
+        ),
+      ],
+    ),
+  );
+}
+
+void dispose() {
+  userCtrl.clear();
+  emailCtrl.clear();
+  passwordCtrl.clear();
+  finalPasswordCtrl.clear();
 }

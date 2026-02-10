@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_gakgak/constant/my_constant.dart';
 import '../widget/_home_borrow.dart';
 
 import 'package:mobile_gakgak/widget/appBackground.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class NoScrollbarScrollBehavior extends ScrollBehavior {
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
@@ -11,14 +13,19 @@ class NoScrollbarScrollBehavior extends ScrollBehavior {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User userOBJ;
+  final String user; // Firebase user
+  const HomeScreen({
+    super.key,
+    required this.userOBJ,
+    required this.user
+    });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
 
   late ScrollController verticalController;
   late ScrollController horizontal1Controller;
@@ -32,6 +39,16 @@ class _HomeScreenState extends State<HomeScreen> {
     horizontal1Controller = ScrollController();
     horizontal2Controller = ScrollController();
     horizontal3Controller = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final bannerShown = prefs.getBool('login_banner_shown') ?? false;
+      
+      if (!bannerShown) {
+        showLoginBanner(context, widget.user);
+        prefs.setBool('login_banner_shown', true);
+      }
+    });
   }
 
   @override
@@ -41,12 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
     horizontal2Controller.dispose();
     horizontal3Controller.dispose();
     super.dispose();
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   @override
@@ -201,27 +212,69 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         ],
       ),
-    bottomNavigationBar: BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-      selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
-      unselectedItemColor: const Color.fromARGB(255, 80, 80, 80),
-      backgroundColor: Color.fromRGBO(46, 46, 46, 1),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings), 
-            label: 'Settings',
-          ),
-        ],
-      ),
     );
   }
+}
+
+void showLoginBanner(BuildContext context, String uName) {
+  final overlay = Overlay.of(context);
+
+  late OverlayEntry entry;
+  late AnimationController controller;
+
+  entry = OverlayEntry(
+    builder: (context) {
+      controller = AnimationController(
+        vsync: Navigator.of(context),
+        duration: const Duration(milliseconds: 350),
+      );
+
+      final animation = Tween<double>(
+        begin: -80,
+        end: 0,
+      ).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeOut),
+      );
+
+      controller.forward();
+
+      Future.delayed(const Duration(seconds: 2), () async {
+        await controller.reverse();
+        entry.remove();
+        controller.dispose();
+      });
+
+      return Positioned(
+        top: 40,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: AnimatedBuilder(
+            animation: animation,
+            builder: (_, child) => Transform.translate(
+              offset: Offset(0, animation.value),
+              child: child,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Color.fromRGBO(208, 208, 208, 1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Logged in as "$uName"',
+                style: headingStyle.copyWith(
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  overlay.insert(entry);
 }
