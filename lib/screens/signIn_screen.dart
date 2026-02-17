@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           final user = credential.user!;
 
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MainScreen(

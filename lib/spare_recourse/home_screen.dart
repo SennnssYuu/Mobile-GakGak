@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_gakgak/constant/my_constant.dart';
-import '../widget/_home_borrow.dart';
+import '_home_borrow.dart';
 
 import 'package:mobile_gakgak/widget/appBackground.dart';
 import 'package:firebase_auth/firebase_auth.dart';

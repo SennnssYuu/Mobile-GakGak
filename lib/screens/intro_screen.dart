@@ -12,17 +12,17 @@ class IntroScreen extends StatelessWidget {
 
   final List <PageViewModel> pages = [
     PageViewModel(
-      title: "View the stats",
+      title: "🔥Discover Trending Anime🔥",
       image: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
           child: Image.asset('images/OnB1.png', height: 900.0, width: 900.0),
         ),
       ),
-      body: "An all in one tool for trainer to min/max their runs. Fans stat for your club.",
+      body: "Explore the hottest anime airing this season. \nStay updated with top-rated shows and never miss the hype.",
       decoration: const PageDecoration(
-        titleTextStyle: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold, color: Color(0xFFFFFFFF)),
-        bodyTextStyle: TextStyle(fontSize: 14.0, color: Color(0xFFFFFFFF)),
+        titleTextStyle: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Color(0xFFFFFFFF)),
+        bodyTextStyle: TextStyle(fontSize: 18.0, color: Color(0xFFFFFFFF)),
         imageFlex: 3,
         bodyFlex: 1,
         pageColor: Colors.transparent,
@@ -31,8 +31,8 @@ class IntroScreen extends StatelessWidget {
       ),
     ),
     PageViewModel(
-      title: "Tier list",
-      body: "Support Card, build, and current inherant meta.",
+      title: "📌Build Your Watchlist📌",
+      body: "Save your favorite anime, track episodes,\nand organize everything in one place.",
       image: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
@@ -40,8 +40,8 @@ class IntroScreen extends StatelessWidget {
         ),
       ),
       decoration: const PageDecoration(
-        titleTextStyle: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold, color: Color(0xFFFFFFFF)),
-        bodyTextStyle: TextStyle(fontSize: 14.0, color: Color(0xFFFFFFFF)),
+        titleTextStyle: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Color(0xFFFFFFFF)),
+        bodyTextStyle: TextStyle(fontSize: 18.0, color: Color(0xFFFFFFFF)),
         imageFlex: 3,
         bodyFlex: 1,
         pageColor: Colors.transparent,
@@ -50,8 +50,8 @@ class IntroScreen extends StatelessWidget {
       ),
     ),
     PageViewModel(
-      title: "Get started!",
-      body: "Browse the app and enjoy all the features we offer without needing to login or sign up.",
+      title: "🎥Experience Anime Like\nNever Before🎥",
+      body: "Your personal anime universe — all in one app.",
       image: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
@@ -59,8 +59,8 @@ class IntroScreen extends StatelessWidget {
         ),
       ),
       decoration: const PageDecoration(
-        titleTextStyle: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold, color: Color(0xFFFFFFFF)),
-        bodyTextStyle: TextStyle(fontSize: 14.0, color: Color(0xFFFFFFFF)),
+        titleTextStyle: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Color(0xFFFFFFFF)),
+        bodyTextStyle: TextStyle(fontSize: 18.0, color: Color(0xFFFFFFFF)),
         imageFlex: 3,
         bodyFlex: 1,
         pageColor: Colors.transparent,
@@ -130,7 +130,7 @@ class IntroScreen extends StatelessWidget {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setBool('seen', true);
         
-            Navigator.of(context).push(
+            Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const LoginScreen(),
               ),

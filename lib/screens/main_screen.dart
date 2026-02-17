@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mobile_gakgak/data/product.dart';
-import 'package:mobile_gakgak/screens/intro_screen.dart';
-import 'package:mobile_gakgak/screens/product_screen.dart';
+import 'package:mobile_gakgak/screens/setting_screen.dart';
 
-import 'home_screen.dart';
+import 'home_screenAnime.dart';
 import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -30,15 +28,12 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
 
     _screens = [
-      HomeScreen(
-        userOBJ: widget.userOBJ,
-        user: widget.user,
-      ),
+      TopSeasonAnimeScreen(),
       ProfileScreen(
         userOBJ: widget.userOBJ,
         user: widget.user,
       ),
-      ProductScreen(),// change to setting later on
+      SettingScreen(),// change to setting later on
     ];
   }
 
