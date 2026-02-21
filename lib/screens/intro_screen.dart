@@ -16,7 +16,7 @@ class IntroScreen extends StatelessWidget {
       image: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: Image.asset('images/OnB1.png', height: 900.0, width: 900.0),
+          child: Image.asset('assets/images/OnB1.png', height: 900.0, width: 900.0),
         ),
       ),
       body: "Explore the hottest anime airing this season. \nStay updated with top-rated shows and never miss the hype.",
@@ -36,7 +36,7 @@ class IntroScreen extends StatelessWidget {
       image: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: Image.asset('images/OnB2.png', height: 900.0, width: 900.0),
+          child: Image.asset('assets/images/OnB2.png', height: 900.0, width: 900.0),
         ),
       ),
       decoration: const PageDecoration(
@@ -55,7 +55,7 @@ class IntroScreen extends StatelessWidget {
       image: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: Image.asset('images/OnB3.png', height: 900.0, width: 900.0),
+          child: Image.asset('assets/images/OnB3.png', height: 900.0, width: 900.0),
         ),
       ),
       decoration: const PageDecoration(

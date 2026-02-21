@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mobile_gakgak/screens/bookmark_screen.dart';
 import 'package:mobile_gakgak/widget/appBackground.dart';
 import 'anime_detail_screen.dart';
+import 'history_screen.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -176,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       itemBuilder: (context, index) {
         if (index == 3) {
-          return _buildMoreBox();
+          return _buildMoreBox(context, section);
         }
 
         final anime = animeList[index];
@@ -210,23 +212,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   );
 }
 
-  Widget _buildMoreBox() {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.grey[800],
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: const Center(
-      child: Text(
-        "More",
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
+  Widget _buildMoreBox(BuildContext context, String section) {
+    return GestureDetector(
+      onTap: () {
+        if (section == "History") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const HistoryScreen(),
+            ),
+          );
+        } else if (section == "To-Watch") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const BookmarkScreen(),
+            ),
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[800],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "More",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
 }

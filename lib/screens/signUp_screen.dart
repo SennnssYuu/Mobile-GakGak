@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:simple_icons/simple_icons.dart';
 
 import 'package:mobile_gakgak/widget/appBackground.dart';
 import 'package:mobile_gakgak/screens/forgotPassword_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mobile_gakgak/screens/main_screen.dart';
+import 'package:mobile_gakgak/screens/auth_service.dart';
 
 final userCtrl = TextEditingController();
 final emailCtrl = TextEditingController();
@@ -206,15 +209,36 @@ class SignupScreen extends StatelessWidget {
         
                   // Facebook button
                   SocialButton(
-                    icon: Icons.facebook,
-                    text: 'Sign up with Facebook',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ForPasScreen(),
-                        )
-                      );
+                    icon: SimpleIcons.github,
+                    text: 'Sign in with GitHub',
+                    onPressed: () async {
+                      try {
+                        final user = await AuthService().signInWithGithub();
+
+                        if (!context.mounted) return;
+
+                        if (user != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MainScreen(
+                                userOBJ: user,
+                                user: user.displayName ?? "No Name",
+                              ),
+                            ),
+                          );
+                        } else {
+                          showInvalidLoginDialog(
+                            context,
+                            "GitHub Sign-Up was cancelled.",
+                          );
+                        }
+                      } catch (e) {
+                        showInvalidLoginDialog(
+                          context,
+                          "GitHub Sign-Up failed.",
+                        );
+                      }
                     },
                   ),
         
@@ -224,13 +248,36 @@ class SignupScreen extends StatelessWidget {
                   SocialButton(
                     icon: Icons.g_mobiledata,
                     text: 'Sign up with Google',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ForPasScreen(),
-                        )
-                      );
+                    onPressed: () async {
+                      try {
+                        final user = await AuthService().signInWithGoogle();
+
+                        if (!context.mounted) return;
+
+                        if (user != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MainScreen(
+                                userOBJ: user,
+                                user: user.displayName ?? "No Name",
+                              ),
+                            ),
+                          );
+                        } else {
+                          showInvalidLoginDialog(
+                            context,
+                            "Google Sign-In was cancelled.",
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          showInvalidLoginDialog(
+                            context,
+                            "Google Sign-In failed. Please try again.",
+                          );
+                        }
+                      }
                     },
                   ),
         

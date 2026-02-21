@@ -7,7 +7,7 @@ import '../widget/appBackground.dart';
 import 'anime_detail_screen.dart';
 
 class TopSeasonAnimeScreen extends StatefulWidget {
-  const TopSeasonAnimeScreen({Key? key}) : super(key: key);
+  const TopSeasonAnimeScreen({super.key});
 
   @override
   State<TopSeasonAnimeScreen> createState() =>
@@ -125,7 +125,7 @@ class _TopSeasonAnimeScreenState
               },
             ),
           ),
-          _buildTopBar(),
+          _buildTopBar(context),
         ],
       ),
     );
@@ -450,7 +450,7 @@ class _TopSeasonAnimeScreenState
   }
 }
 
-Widget _buildTopBar() {
+Widget _buildTopBar(context) {
   return SafeArea(
     child: Padding(
       padding:
@@ -458,15 +458,164 @@ Widget _buildTopBar() {
               horizontal: 16,
               vertical: 12),
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment
-                .spaceBetween,
-        children: const [
-          Icon(Icons.search,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon : Icon(Icons.search,
               color: Colors.white,
-              size: 28),
+                            size: 28
+            ),
+            onPressed: () async{
+              final result = await showSearch(
+                context: context,
+                delegate: AnimeSearchDelegate(),
+              );
+
+              if (result != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AnimeDetailScreen(
+                      anime: result,
+                      heroTag: result['mal_id'].toString(),
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
         ],
       ),
     ),
   );
+}
+
+class AnimeSearchDelegate extends SearchDelegate {
+  Future<List<dynamic>> fetchAnime(String query) async {
+    if (query.isEmpty) return [];
+
+    final response = await http.get(
+      Uri.parse("https://api.jikan.moe/v4/anime?q=$query&limit=10"),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['data'];
+    } else {
+      throw Exception("Failed to load anime");
+    }
+  }
+
+  @override
+  String get searchFieldLabel => "Search anime...";
+
+  // ❌ Clear button
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            query = '';
+            showSuggestions(context);
+          },
+        )
+    ];
+  }
+
+  // 🔙 Back button
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  // 🔎 Results when submitted
+  @override
+  Widget buildResults(BuildContext context) {
+    return Stack(
+      children: [
+        AppBackground(), // 👈 your background
+
+        FutureBuilder<List<dynamic>>(
+          future: fetchAnime(query),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text(
+                  "Something went wrong",
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            }
+
+            final results = snapshot.data ?? [];
+
+            if (results.isEmpty) {
+              return const Center(
+                child: Text(
+                  "No results found",
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.only(top: 16),
+              itemCount: results.length,
+              itemBuilder: (context, index) {
+                final anime = results[index];
+
+                return ListTile(
+                  leading: Image.network(
+                    anime['images']['jpg']['image_url'],
+                    width: 50,
+                    fit: BoxFit.cover,
+                  ),
+                  title: Text(
+                    anime['title'],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    "⭐ ${anime['score'] ?? 'N/A'}",
+                    style: const TextStyle(color: Colors.white54),
+                  ),
+                  onTap: () {
+                    close(context, anime);
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // 🔄 Suggestions while typing
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Stack(
+      children: [
+        AppBackground(),
+        const Center(
+          child: Text(
+            "Search for your favorite anime...",
+            style: TextStyle(color: Colors.white54),
+          ),
+        ),
+      ],
+    );
+  }
 }

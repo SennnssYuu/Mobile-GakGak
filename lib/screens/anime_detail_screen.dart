@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_gakgak/widget/appBackground.dart';
 
 class AnimeDetailScreen extends StatelessWidget {
   final dynamic anime;
@@ -16,6 +17,7 @@ class AnimeDetailScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          AppBackground(),
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +28,7 @@ class AnimeDetailScreen extends StatelessWidget {
                   child: Image.network(
                     anime['images']['jpg']['large_image_url'],
                     width: double.infinity,
-                    height: 450,
+                    height: 650,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -38,14 +40,66 @@ class AnimeDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 🔥 TITLE
-                      Text(
-                        anime['title'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // 🔥 TITLE
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              anime['title'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          // 🔖 BOOKMARK + ▶ WATCH BUTTONS
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              // 🔖 Bookmark Button
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.bookmark_border),
+                                  color: Colors.white,
+                                  onPressed: () {
+                                    // TODO: Add bookmark logic
+                                  },
+                                ),
+                              ),
+
+                              // ▶ Watch Button
+                              SizedBox(
+                                height: 50,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    // TODO: Add watch logic
+                                  },
+                                  child: const Text(
+                                    "Watch",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
 
                       const SizedBox(height: 10),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:simple_icons/simple_icons.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:mobile_gakgak/screens/auth_service.dart';
 import 'package:mobile_gakgak/screens/main_screen.dart';
 import 'package:mobile_gakgak/screens/signUp_screen.dart';
 import 'package:mobile_gakgak/screens/forgotPassword_screen.dart';
@@ -49,20 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-        
-                  // Back button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-        
-                  const SizedBox(height: 32),
         
                   // Title
                   const Text(
@@ -172,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                           );
                         } on FirebaseAuthException {
-                          showInvalidLoginDialog(context);
+                          showInvalidLoginDialog(context, "Invalid email or password");
                         }
                         catch (e) {
                           print(e);
@@ -222,15 +210,36 @@ class _LoginScreenState extends State<LoginScreen> {
         
                   // Facebook button
                   SocialButton(
-                    icon: Icons.facebook,
-                    text: 'Sign in with Facebook',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ForPasScreen(),
-                        )
-                      );
+                    icon: SimpleIcons.github,
+                    text: 'Sign in with GitHub',
+                    onPressed: () async {
+                      try {
+                        final user = await AuthService().signInWithGithub();
+
+                        if (!context.mounted) return;
+
+                        if (user != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MainScreen(
+                                userOBJ: user,
+                                user: user.displayName ?? "No Name",
+                              ),
+                            ),
+                          );
+                        } else {
+                          showLoginFailedDialog(
+                            context,
+                            "GitHub Sign-In was cancelled.",
+                          );
+                        }
+                      } catch (e) {
+                        showLoginFailedDialog(
+                          context,
+                          "GitHub Sign-In failed.",
+                        );
+                      }
                     },
                   ),
         
@@ -240,13 +249,37 @@ class _LoginScreenState extends State<LoginScreen> {
                   SocialButton(
                     icon: Icons.g_mobiledata,
                     text: 'Sign in with Google',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ForPasScreen(),
-                        )
-                      );
+                    onPressed: () async {
+                      try {
+                        final user = await AuthService().signInWithGoogle();
+
+                        if (!context.mounted) return;
+
+                        if (user != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MainScreen(
+                                userOBJ: user,
+                                user: user.displayName ?? "No Name",
+                              ),
+                            ),
+                          );
+                        } else {
+                          // User cancelled login
+                          showLoginFailedDialog(
+                            context,
+                            "Google Sign-In failed. Please try again.",
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          showLoginFailedDialog(
+                            context,
+                            "Google Sign-In failed. Please try again.",
+                          );
+                        }
+                      }
                     },
                   ),
         
@@ -403,22 +436,30 @@ class SocialButton extends StatelessWidget {
   }
 }
 
-void showInvalidLoginDialog(BuildContext context) {
+void showLoginFailedDialog(BuildContext context, String message) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       title: Row(
         children: const [
-          Icon(Icons.close, color: Colors.red),
+          Icon(Icons.error_outline, color: Colors.red),
           SizedBox(width: 8),
           Text('Login Failed'),
         ],
       ),
-      content: const Text('Invalid email or password'),
+      content: Text(message),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('OK', style: TextStyle(color: Color.fromRGBO(36, 36, 36, 1))),
+          child: const Text(
+            'OK',
+            style: TextStyle(
+              color: Color.fromRGBO(36, 36, 36, 1),
+            ),
+          ),
         ),
       ],
     ),
