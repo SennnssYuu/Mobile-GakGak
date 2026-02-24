@@ -1,21 +1,20 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobile_gakgak/screens/bookmark_screen.dart';
+import 'package:mobile_gakgak/screens/history_screen.dart';
 import 'package:mobile_gakgak/widget/appBackground.dart';
-import 'anime_detail_screen.dart';
-import 'history_screen.dart';
+import '../spare_recourse/user_service.dart';
+import '../data/users.dart';
 
+import 'package:mobile_gakgak/spare_recourse/bookmark_service.dart';
+import 'package:mobile_gakgak/spare_recourse/history_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final User userOBJ;
-  final String user;
 
   const ProfileScreen({
     super.key,
     required this.userOBJ,
-    required this.user,
   });
 
   @override
@@ -23,132 +22,147 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static Future<List<dynamic>>? cachedTopAnime;
-  late Future<List<dynamic>> topAnime;
-
-  Future<List<dynamic>> fetchTopAnime() async {
-    final response =
-        await http.get(Uri.parse("https://api.jikan.moe/v4/top/anime?limit=5"));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['data'];
-    } else {
-      throw Exception("Failed to load anime");
-    }
-  }
+  AppUser? userData;
 
   @override
   void initState() {
     super.initState();
+    _loadSettings();
+  }
 
-    cachedTopAnime ??= fetchTopAnime();
-    topAnime = cachedTopAnime!;
+  Future<void> _loadSettings() async {
+    final user = await UserService().getUser();
+    setState(() {
+      userData = user;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final displayName =
+        (userData?.name ?? "").isNotEmpty ? userData!.name : "Guest";
+
+    final displayEmail =
+        (userData?.email ?? "").isNotEmpty
+            ? userData!.email
+            : widget.userOBJ.email ?? "No Email";
+
+    final profileImage =
+        (userData?.profile ?? "").isNotEmpty
+            ? userData!.profile
+            : "pfp1.png";
+
     return Scaffold(
       backgroundColor: const Color(0xFF1B1B1B),
       body: Stack(
         children: [
           const AppBackground(),
           SafeArea(
-            child: FutureBuilder<List<dynamic>>(
-              future: topAnime,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Colors.red),
-                  );
-                }
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
 
-                final animeList = snapshot.data!;
-
-                return SingleChildScrollView(
-                  child: Column(
+                  // 🔥 Avatar
+                  Stack(
                     children: [
-                      const SizedBox(height: 30),
-
-                      // 🔥 Avatar Section
-                      Stack(
-                        children: [
-                          const CircleAvatar(
-                            radius: 60,
-                            backgroundImage: NetworkImage(
-                              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD7Q7EqY_tJt7qQ3h8VZGa4qQWDa063YysMw&s',
-                            ),
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundImage:
+                            AssetImage("images/$profileImage"),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.black54,
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 18,
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () {}, // Empty for now
-                              child: const CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.black54,
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-
-                      const SizedBox(height: 15),
-
-                      Text(
-                        widget.user,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
-
-                      const SizedBox(height: 5),
-
-                      Text(
-                        widget.userOBJ.email ?? "",
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // 👀 TO WATCH LIST
-                      _buildSectionTitle("My To-Watch List"),
-                      const SizedBox(height: 15),
-                      _buildAnimeRow(animeList, "To-Watch"),
-
-                      const SizedBox(height: 30),
-
-                      // 📺 HISTORY LIST
-                      _buildSectionTitle("My History Watched"),
-                      const SizedBox(height: 15),
-                      _buildAnimeRow(animeList, "History"),
-
-                      const SizedBox(height: 40),
                     ],
                   ),
-                );
-              },
-        ),
-      ),
+
+                  const SizedBox(height: 15),
+
+                  Text(
+                    displayName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
+                  Text(
+                    displayEmail,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // ===============================
+                  // 📌 BOOKMARK SECTION
+                  // ===============================
+                  _buildSectionTitle("Bookmark"),
+                  const SizedBox(height: 15),
+                  _buildGridSection(
+                    type: "bookmark",
+                    onMoreTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const BookmarkScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 35),
+
+                  // ===============================
+                  // 🕒 HISTORY SECTION
+                  // ===============================
+                  _buildSectionTitle("History"),
+                  const SizedBox(height: 15),
+                  _buildGridSection(
+                    type: "history",
+                    onMoreTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HistoryScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 50),
+                ],
+              ),
+            ),
+          ),
         ],
-      )
-      
+      ),
     );
   }
 
+  // ===============================
+  // SECTION TITLE
+  // ===============================
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 25),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
@@ -163,91 +177,113 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAnimeRow(List<dynamic> animeList, String section) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 4,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-        childAspectRatio: 0.7,
-      ),
-      itemBuilder: (context, index) {
-        if (index == 3) {
-          return _buildMoreBox(context, section);
-        }
+  // ===============================
+  // 2x2 GRID SECTION
+  // ===============================
+  Widget _buildGridSection({
+    required String type, // "bookmark" or "history"
+    required VoidCallback onMoreTap,
+  }) {
+    final bookmarkService = BookmarkService();
+    final historyService = HistoryService();
 
-        final anime = animeList[index];
-        final heroTag = "${anime['mal_id']}_${section}_$index";
-
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AnimeDetailScreen(
-                  anime: anime,
-                  heroTag: heroTag,
-                ),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: StreamBuilder<List<dynamic>>(
+        stream: type == "bookmark"
+            ? bookmarkService.streamBookmarks()
+            : historyService.streamHistory(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
             );
-          },
-          child: Hero(
-            tag: heroTag,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                anime['images']['jpg']['image_url'],
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        );
-      },
-    ),
-  );
-}
+          }
 
-  Widget _buildMoreBox(BuildContext context, String section) {
-    return GestureDetector(
-      onTap: () {
-        if (section == "History") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const HistoryScreen(),
+          final items = snapshot.data!;
+
+          // Take only first 3
+          final previewItems = items.take(3).toList();
+
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 4,
+            gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.8,
             ),
+            itemBuilder: (context, index) {
+              // 🔵 MORE TILE
+              if (index == 3) {
+                return GestureDetector(
+                  onTap: onMoreTap,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(16),
+                        child: Image.asset(
+                          "images/more.png",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Text(
+                        "More",
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight:
+                              FontWeight.bold,
+                          foreground: Paint()
+                            ..style =
+                                PaintingStyle.stroke
+                            ..strokeWidth = 3
+                            ..color = Colors.white,
+                        ),
+                      ),
+                      const Text(
+                        "More",
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight:
+                              FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // If less than 3 items → empty tile
+              if (index >= previewItems.length) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius:
+                        BorderRadius.circular(16),
+                  ),
+                );
+              }
+
+              final anime = previewItems[index];
+
+              return ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(16),
+                child: Image.network(
+                  anime.picture,
+                  fit: BoxFit.cover,
+                ),
+              );
+            },
           );
-        } else if (section == "To-Watch") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const BookmarkScreen(),
-            ),
-          );
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Text(
-            "More",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ),
+        },
       ),
     );
   }
-
 }

@@ -4,7 +4,7 @@ import 'package:simple_icons/simple_icons.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:mobile_gakgak/screens/auth_service.dart';
+import 'package:mobile_gakgak/spare_recourse/auth_service.dart';
 import 'package:mobile_gakgak/screens/main_screen.dart';
 import 'package:mobile_gakgak/screens/signUp_screen.dart';
 import 'package:mobile_gakgak/screens/forgotPassword_screen.dart';
@@ -143,22 +143,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       onPressed: () async {
                         try {
-                          final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          final user = await AuthService().signInWithEmail(
                             email: emailCtrl.text.trim(),
                             password: passwordCtrl.text.trim(),
                           );
 
-                          final user = credential.user!;
-
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MainScreen(
-                                userOBJ : user,
-                                user: user.displayName!
+                          if (user != null) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MainScreen(
+                                  userOBJ: user,
+                                  user: user.displayName ?? "No Name",
                                 ),
-                            )
-                          );
+                              ),
+                            );
+                          }
                         } on FirebaseAuthException {
                           showInvalidLoginDialog(context, "Invalid email or password");
                         }
@@ -218,29 +218,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         if (!context.mounted) return;
 
-                        if (user != null) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => MainScreen(
-                                userOBJ: user,
-                                user: user.displayName ?? "No Name",
-                              ),
-                            ),
-                          );
-                        } else {
+                        if (user == null) {
                           showLoginFailedDialog(
                             context,
                             "GitHub Sign-In was cancelled.",
                           );
+                          return;
                         }
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MainScreen(
+                              userOBJ: user,
+                              user: user.displayName ?? "No Name",
+                            ),
+                          ),
+                        );
+
+                      } on FirebaseAuthException catch (e) {
+                        showLoginFailedDialog(
+                          context,
+                          e.message ?? "GitHub Sign-In failed.",
+                        );
                       } catch (e) {
                         showLoginFailedDialog(
                           context,
                           "GitHub Sign-In failed.",
                         );
                       }
-                    },
+                    }
                   ),
         
                   const SizedBox(height: 12),
@@ -255,32 +262,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         if (!context.mounted) return;
 
-                        if (user != null) {
-                          Navigator.pushReplacement(
+                        if (user == null) {
+                          showLoginFailedDialog(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => MainScreen(
-                                userOBJ: user,
-                                user: user.displayName ?? "No Name",
-                              ),
+                            "Google Sign-In was cancelled.",
+                          );
+                          return;
+                        }
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MainScreen(
+                              userOBJ: user,
+                              user: user.displayName ?? "No Name",
                             ),
-                          );
-                        } else {
-                          // User cancelled login
-                          showLoginFailedDialog(
-                            context,
-                            "Google Sign-In failed. Please try again.",
-                          );
-                        }
+                          ),
+                        );
+
+                      } on FirebaseAuthException catch (e) {
+                        showLoginFailedDialog(
+                          context,
+                          e.message ?? "Google Sign-In failed.",
+                        );
                       } catch (e) {
-                        if (context.mounted) {
-                          showLoginFailedDialog(
-                            context,
-                            "Google Sign-In failed. Please try again.",
-                          );
-                        }
+                        showLoginFailedDialog(
+                          context,
+                          "Google Sign-In failed. Please try again.",
+                        );
                       }
-                    },
+                    }
                   ),
         
                   const SizedBox(height: 32),

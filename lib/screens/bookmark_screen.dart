@@ -1,24 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:mobile_gakgak/widget/appBackground.dart';
+import '../spare_recourse/bookmark_service.dart';
+import '../data/anime_bookmark.dart';
 import 'anime_detail_screen.dart';
 
 class BookmarkScreen extends StatelessWidget {
   const BookmarkScreen({super.key});
-
-  Future<List<dynamic>> fetchBookmarkAnime() async {
-    final response = await http.get(
-      Uri.parse("https://api.jikan.moe/v4/top/anime?limit=10"),
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['data'];
-    } else {
-      throw Exception("Failed to load anime");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +14,8 @@ class BookmarkScreen extends StatelessWidget {
       body: Stack(
         children: [
           const AppBackground(),
+
+          // 🔙 Back Button
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -44,7 +33,7 @@ class BookmarkScreen extends StatelessWidget {
             ),
           ),
 
-          
+          // 📚 Bookmark Content
           SafeArea(
             child: Column(
               children: [
@@ -62,8 +51,8 @@ class BookmarkScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 Expanded(
-                  child: FutureBuilder<List<dynamic>>(
-                    future: fetchBookmarkAnime(),
+                  child: FutureBuilder<List<AnimeBookmark>>(
+                    future: BookmarkService().getBookmarks(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState ==
                           ConnectionState.waiting) {
@@ -81,14 +70,23 @@ class BookmarkScreen extends StatelessWidget {
                         );
                       }
 
-                      final animeList = snapshot.data ?? [];
+                      final bookmarks = snapshot.data ?? [];
+
+                      if (bookmarks.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No bookmarks yet",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        );
+                      }
 
                       return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: animeList.length,
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: bookmarks.length,
                         itemBuilder: (context, index) {
-                          final anime = animeList[index];
-
+                          final anime = bookmarks[index];
                           return _buildBookmarkItem(context, anime);
                         },
                       );
@@ -103,8 +101,9 @@ class BookmarkScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBookmarkItem(BuildContext context, dynamic anime) {
-    final heroTag = "bookmark_${anime['mal_id']}";
+  Widget _buildBookmarkItem(
+      BuildContext context, AnimeBookmark anime) {
+    final heroTag = "bookmark_${anime.id}";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -121,7 +120,7 @@ class BookmarkScreen extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                anime['images']['jpg']['image_url'],
+                anime.picture,
                 width: 80,
                 height: 110,
                 fit: BoxFit.cover,
@@ -137,7 +136,7 @@ class BookmarkScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  anime['title'],
+                  anime.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -158,7 +157,7 @@ class BookmarkScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      "${anime['score'] ?? 'N/A'}",
+                      anime.rating.toString(),
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
@@ -182,7 +181,17 @@ class BookmarkScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => AnimeDetailScreen(
-                    anime: anime,
+                    anime: {
+                      'mal_id': anime.id,
+                      'title': anime.name,
+                      'score': anime.rating,
+                      'images': {
+                        'jpg': {
+                          'large_image_url': anime.picture,
+                          'image_url': anime.picture,
+                        }
+                      },
+                    },
                     heroTag: heroTag,
                   ),
                 ),

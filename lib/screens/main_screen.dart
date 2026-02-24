@@ -31,7 +31,6 @@ class _MainScreenState extends State<MainScreen> {
       TopSeasonAnimeScreen(),
       ProfileScreen(
         userOBJ: widget.userOBJ,
-        user: widget.user,
       ),
       SettingScreen(),// change to setting later on
     ];

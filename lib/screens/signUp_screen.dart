@@ -4,7 +4,7 @@ import 'package:simple_icons/simple_icons.dart';
 
 import 'package:mobile_gakgak/widget/appBackground.dart';
 import 'package:mobile_gakgak/screens/main_screen.dart';
-import 'package:mobile_gakgak/screens/auth_service.dart';
+import 'package:mobile_gakgak/spare_recourse/auth_service.dart';
 
 final userCtrl = TextEditingController();
 final emailCtrl = TextEditingController();
@@ -153,21 +153,27 @@ class SignupScreen extends StatelessWidget {
                         try {
                           if (passwordCtrl.text.trim() != finalPasswordCtrl.text.trim()) {
                             showInvalidLoginDialog(context, 'Passwords do not match.');
+                            return;
                           }
-                          else if(userCtrl.text.trim().isEmpty){
+
+                          if (userCtrl.text.trim().isEmpty) {
                             showInvalidLoginDialog(context, 'Username cannot be empty.');
+                            return;
                           }
-                          else
-                          {
-                            final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+
+                          final user = await AuthService().signUpWithEmail(
                             email: emailCtrl.text.trim(),
                             password: passwordCtrl.text.trim(),
-                            );
-                            await credential.user!.updateDisplayName(userCtrl.text.trim());
-                            await credential.user!.reload();
+                            name: userCtrl.text.trim(),
+                          );
+
+                          if (!context.mounted) return;
+
+                          if (user != null) {
                             showValidLoginDialog(context);
                             dispose();
                           }
+
                         } on FirebaseAuthException catch (e) {
                           if (e.code == 'weak-password') {
                             showInvalidLoginDialog(context, 'The password is too weak.');

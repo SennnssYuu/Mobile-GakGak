@@ -45,6 +45,9 @@ dependencies:
   carousel_slider: ^5.0.0
   google_sign_in: ^7.2.0
   simple_icons: ^14.6.1
+  cloud_firestore: ^6.1.2
+  intl: ^0.18.1
+  video_player: ^2.8.2
 
 
 dev_dependencies:
@@ -73,7 +76,9 @@ flutter:
   assets:
     - lib/images/
     - assets/images/
-  #   - images/a_dot_ham.jpeg
+    - assets/Video/v1.mp4
+    - assets/Video/v2.mp4
+    - assets/Video/v3.mp4
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
