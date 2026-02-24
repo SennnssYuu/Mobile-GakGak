@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../widget/appBackground.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signin_screen.dart'; // adjust path if needed
+import 'account_screen.dart';
+import 'notification_screen.dart';
+import 'privacy_screen.dart';
 
 
 class SettingScreen extends StatelessWidget {
@@ -41,22 +44,38 @@ class SettingScreen extends StatelessWidget {
                       _buildSettingItem(
                         icon: Icons.person_outline,
                         title: "Account",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AccountScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _buildSettingItem(
                         icon: Icons.notifications_none,
                         title: "Notifications",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotificationScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _buildSettingItem(
                         icon: Icons.lock_outline,
                         title: "Privacy & Security",
-                        onTap: () {},
-                      ),
-                      _buildSettingItem(
-                        icon: Icons.help_outline,
-                        title: "Help & Support",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PrivacyScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _buildSettingItem(
                         icon: Icons.logout,
@@ -71,6 +90,45 @@ class SettingScreen extends StatelessWidget {
                           );
                         },
                         isSignOut: true,
+                      ),
+
+                      // 👇 Footer here
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: Colors.white12),
+                          ),
+                        ),
+                        child: Column(
+                          children: const [
+                            Text(
+                              "Help & Support",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "Email: JoeWho@gnail.com",
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Phone: +1 234 567 890",
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

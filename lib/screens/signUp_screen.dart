@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:simple_icons/simple_icons.dart';
 
 import 'package:mobile_gakgak/widget/appBackground.dart';
-import 'package:mobile_gakgak/screens/forgotPassword_screen.dart';
 import 'package:mobile_gakgak/screens/main_screen.dart';
 import 'package:mobile_gakgak/screens/auth_service.dart';
 
